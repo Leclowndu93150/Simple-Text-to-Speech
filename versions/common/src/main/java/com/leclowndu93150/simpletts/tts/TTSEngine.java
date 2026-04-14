@@ -7,6 +7,7 @@ import org.pitest.voices.audio.Audio;
 import org.pitest.voices.Voice;
 import org.pitest.voices.us.EnUsDictionary;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -52,12 +53,26 @@ public class TTSEngine {
     }
 
     public void setVoice(TTSVoice voice) {
-        if (chorus == null) return;
+        if (chorus == null) {
+            return;
+        }
         try {
+            sanitizeCachedModelConfig(voice);
             currentVoice = chorus.voice(voice.getModel());
             currentVoiceType = voice;
             Simpletts.LOGGER.info("Voice set to: {}", voice.getDisplayName());
         } catch (Exception e) {
+            boolean retried = false;
+            try {
+                if (sanitizeCachedModelConfig(voice)) {
+                    retried = true;
+                    currentVoice = chorus.voice(voice.getModel());
+                    currentVoiceType = voice;
+                    return;
+                }
+            } catch (Exception retryError) {
+                e.addSuppressed(retryError);
+            }
             Simpletts.LOGGER.error("Failed to set voice: {}", voice.getDisplayName(), e);
         }
     }
@@ -137,7 +152,9 @@ public class TTSEngine {
         }
         try {
             Path modelDir = cacheBase.resolve("vits-piper-" + voice.getId());
-            return Files.exists(modelDir) && Files.list(modelDir).findAny().isPresent();
+            boolean exists = Files.exists(modelDir);
+            boolean hasFiles = exists && Files.list(modelDir).findAny().isPresent();
+            return exists && hasFiles;
         } catch (Exception e) {
             return false;
         }
@@ -182,6 +199,51 @@ public class TTSEngine {
             }
             chorus = null;
             currentVoice = null;
+            currentVoiceType = null;
         }
+    }
+
+    private boolean sanitizeCachedModelConfig(TTSVoice voice) throws Exception {
+        if (voice == null || cacheBase == null || !voice.requiresDownload()) {
+            return false;
+        }
+
+        Path configPath = cacheBase
+                .resolve("vits-piper-" + voice.getId())
+                .resolve(voice.getId() + ".onnx.json");
+        if (!Files.exists(configPath)) {
+            return false;
+        }
+
+        String text = Files.readString(configPath, StandardCharsets.UTF_8);
+        String escaped = escapeNonAsciiJson(text);
+        if (text.equals(escaped)) {
+            return false;
+        }
+
+        Files.writeString(configPath, escaped, StandardCharsets.UTF_8);
+        return true;
+    }
+
+    private String escapeNonAsciiJson(String text) {
+        StringBuilder escaped = new StringBuilder(text.length());
+        text.codePoints().forEach(codePoint -> {
+            if (codePoint >= 0x20 && codePoint <= 0x7E) {
+                escaped.append((char) codePoint);
+                return;
+            }
+            if (codePoint == '\n' || codePoint == '\r' || codePoint == '\t') {
+                escaped.append((char) codePoint);
+                return;
+            }
+            if (codePoint <= 0xFFFF) {
+                escaped.append(String.format("\\u%04X", codePoint));
+                return;
+            }
+            for (char surrogate : Character.toChars(codePoint)) {
+                escaped.append(String.format("\\u%04X", (int) surrogate));
+            }
+        });
+        return escaped.toString();
     }
 }

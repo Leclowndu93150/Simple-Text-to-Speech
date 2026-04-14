@@ -3,7 +3,6 @@ package com.leclowndu93150.simpletts.voicechat;
 import com.leclowndu93150.simpletts.Simpletts;
 import com.leclowndu93150.simpletts.config.TTSConfig;
 import com.leclowndu93150.simpletts.tts.TTSEngine;
-import com.leclowndu93150.simpletts.tts.TTSVoice;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatClientApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
@@ -11,6 +10,10 @@ import de.maxhenkel.voicechat.api.events.ClientVoicechatConnectionEvent;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MergeClientSoundEvent;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TTSVoicechatPlugin implements VoicechatPlugin {
@@ -22,6 +25,7 @@ public class TTSVoicechatPlugin implements VoicechatPlugin {
     private VoicechatClientApi clientApi;
     private final ConcurrentLinkedQueue<short[]> audioQueue = new ConcurrentLinkedQueue<>();
     private boolean speaking;
+    private volatile SourceDataLine localPlaybackLine;
 
     public TTSVoicechatPlugin() {
         instance = this;
@@ -53,6 +57,7 @@ public class TTSVoicechatPlugin implements VoicechatPlugin {
             Simpletts.LOGGER.info("Simple TTS connected to voice chat");
         } else {
             clientApi = null;
+            stopLocalPlayback();
             audioQueue.clear();
             speaking = false;
         }
@@ -75,16 +80,22 @@ public class TTSVoicechatPlugin implements VoicechatPlugin {
         }
 
         engine.synthesize(text).thenAccept(audio -> {
-            if (audio.length == 0) return;
+            if (audio.length == 0) {
+                return;
+            }
 
             float volumeMultiplier = TTSConfig.getInstance().volume / 100.0f;
             short[] adjusted = applyVolume(audio, volumeMultiplier);
+            if (TTSConfig.getInstance().hearSelf) {
+                playLocally(adjusted);
+            }
             queueAudio(adjusted);
         });
     }
 
     public void stopSpeaking() {
         audioQueue.clear();
+        stopLocalPlayback();
         speaking = false;
     }
 
@@ -116,5 +127,50 @@ public class TTSVoicechatPlugin implements VoicechatPlugin {
 
     public boolean isConnected() {
         return clientApi != null;
+    }
+
+    private void playLocally(short[] audio) {
+        Thread thread = new Thread(() -> {
+            try {
+                AudioFormat format = new AudioFormat(48000, 16, 1, true, false);
+                DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+                SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+                line.open(format);
+                synchronized (this) {
+                    stopLocalPlayback();
+                    localPlaybackLine = line;
+                }
+                line.start();
+
+                byte[] bytes = new byte[audio.length * 2];
+                for (int i = 0; i < audio.length; i++) {
+                    bytes[i * 2] = (byte) (audio[i] & 0xFF);
+                    bytes[i * 2 + 1] = (byte) ((audio[i] >> 8) & 0xFF);
+                }
+
+                line.write(bytes, 0, bytes.length);
+                line.drain();
+                synchronized (this) {
+                    if (localPlaybackLine == line) {
+                        localPlaybackLine = null;
+                    }
+                }
+                line.close();
+            } catch (Exception e) {
+                Simpletts.LOGGER.error("Failed to play local TTS audio", e);
+            }
+        }, "SimpleTTS-LocalPlayback");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private synchronized void stopLocalPlayback() {
+        if (localPlaybackLine == null) {
+            return;
+        }
+        localPlaybackLine.stop();
+        localPlaybackLine.flush();
+        localPlaybackLine.close();
+        localPlaybackLine = null;
     }
 }
