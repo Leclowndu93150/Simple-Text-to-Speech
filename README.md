@@ -1,13 +1,12 @@
 # Simple Text to Speech
 
-Simple Text to Speech lets you type a message and play it through [Simple Voice Chat](https://modrepo.de/minecraft/voicechat) as spoken audio.
+Simple Text to Speech lets you type a message and play it through [Simple Voice Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat) as spoken audio.
 
-It is a client-side mod for Minecraft 1.20.1 with Fabric and Forge support. Speech is generated locally with the Voices library, and can be played into voice chat as if you were talking.
+It is a client-side mod for Minecraft 1.20.1 with Fabric and Forge support. Speech is generated locally with the [Voices library](https://github.com/hcoles/voices), and can be played into voice chat as if you were talking.
 
 ## Features
 
 - Type text and send it through Simple Voice Chat as speech
-- Works on Fabric and Forge for Minecraft 1.20.1
 - Built in config screen with voice, volume, speed, and local playback options
 - Quick input screen for sending speech without opening the config
 - Speech history for replaying common messages
@@ -16,12 +15,9 @@ It is a client-side mod for Minecraft 1.20.1 with Fabric and Forge support. Spee
 
 ## Screenshots
 
-Add your screenshots here.
+![image](https://media.forgecdn.net/attachments/description/null/description_2eb721ca-31f9-4d86-a04a-a2d6ff1bfc2e.png)
 
-```md
-![Config Screen](path/to/config-screen.png)
-![Speak Screen](path/to/speak-screen.png)
-```
+![image](https://media.forgecdn.net/attachments/description/null/description_14092684-6249-4a86-9762-0823de3b6b47.png)
 
 ## Requirements
 
@@ -43,16 +39,6 @@ You can also use commands:
 - `/tts speak <text>`
 - `/tts stop`
 
-## Config
-
-The config screen lets you change:
-
-- Language
-- Voice
-- Volume
-- Speed
-- Hear Self
-
 `Hear Self` plays your generated speech locally in addition to sending it through voice chat.
 
 ## Notes
@@ -60,3 +46,9 @@ The config screen lets you change:
 - Voice generation happens on your client.
 - Some voices are downloaded on first use.
 - Voice quality and startup time depend on the selected model.
+
+Support on Discord
+
+If you'd like to support me and the development of my mods, I recommend trying out BisectHosting. Use code "project8gbderam" to get 25% off your first month of a gaming server for new customers. They offer 24/7 support and lightning-fast response times, ensuring you're in great hands and providing exceptional assistance for all your gaming needs. https://www.bisecthosting.com/project8gbderam
+
+Bisect
