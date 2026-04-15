@@ -62,10 +62,8 @@ public class TTSEngine {
             currentVoiceType = voice;
             Simpletts.LOGGER.info("Voice set to: {}", voice.getDisplayName());
         } catch (Exception e) {
-            boolean retried = false;
             try {
                 if (sanitizeCachedModelConfig(voice)) {
-                    retried = true;
                     currentVoice = chorus.voice(voice.getModel());
                     currentVoiceType = voice;
                     return;

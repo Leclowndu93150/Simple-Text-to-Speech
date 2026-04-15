@@ -72,6 +72,10 @@ prism {
                 jarJar("org.pitest.voices:model-downloader:0.0.9")
                 jarJar("org.pitest.voices:en_us:0.0.9")
                 jarJar("com.microsoft.onnxruntime:onnxruntime:1.20.0")
+                jarJar("org.apache.opennlp:opennlp-tools:2.5.5")
+                jarJar("org.apache.commons:commons-compress:1.28.0")
+                jarJar("commons-io:commons-io:2.20.0")
+                jarJar("org.apache.commons:commons-lang3:3.19.0")
             }
         }
         forge {

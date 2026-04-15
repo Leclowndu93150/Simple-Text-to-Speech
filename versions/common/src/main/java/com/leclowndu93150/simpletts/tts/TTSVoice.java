@@ -3,7 +3,6 @@ package com.leclowndu93150.simpletts.tts;
 import org.pitest.voices.Language;
 import org.pitest.voices.Model;
 import org.pitest.voices.download.FileModel;
-import org.pitest.voices.download.ModelDownloader;
 import org.pitest.voices.piper.PiperHandler;
 
 import java.net.URL;
@@ -91,7 +90,7 @@ public class TTSVoice {
     private static Model sherpaModel(String name, Language language, float gain) {
         try {
             URL url = new URL("https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-" + name + ".tar.bz2");
-            return new FileModel(PiperHandler.piper(), name, "vits-piper-" + name, language, -1, new ModelDownloader(url), gain);
+            return new FileModel(PiperHandler.piper(), name, "vits-piper-" + name, language, -1, new SherpaModelFetcher(url, name), gain);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create model: " + name, e);
         }
@@ -141,10 +140,15 @@ public class TTSVoice {
 
         addDownloadable(TTSLanguage.PT_PT, "Tugalhais (Medium)", "pt_PT-tugalhais-medium", Language.pt_PT, 1.0f);
 
-        addDownloadable(TTSLanguage.NL_NL, "Nathalie (Medium)", "nl_NL-nathalie-medium", Language.nl_NL, 1.0f);
-        addDownloadable(TTSLanguage.NL_NL, "MLS (Medium)", "nl_NL-mls-medium", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_NL, "Pim (Medium)", "nl_NL-pim-medium", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_NL, "Ronnie (Medium)", "nl_NL-ronnie-medium", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_NL, "Dii (High)", "nl_NL-dii-high", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_NL, "Miro (High)", "nl_NL-miro-high", Language.nl_NL, 1.0f);
 
         addDownloadable(TTSLanguage.NL_BE, "Nathalie (Medium)", "nl_BE-nathalie-medium", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_BE, "Nathalie (Extra Low)", "nl_BE-nathalie-x_low", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_BE, "RDH (Medium)", "nl_BE-rdh-medium", Language.nl_NL, 1.0f);
+        addDownloadable(TTSLanguage.NL_BE, "RDH (Extra Low)", "nl_BE-rdh-x_low", Language.nl_NL, 1.0f);
 
         addDownloadable(TTSLanguage.PL_PL, "Darkman (Medium)", "pl_PL-darkman-medium", Language.pl_PL, 1.0f);
 

@@ -140,6 +140,7 @@ public class TTSConfigScreen {
                                                                 playPreviewAudio(audio);
                                                             }
                                                         } catch (Exception e) {
+                                                            Simpletts.LOGGER.error("Preview failed", e);
                                                             previewStatus.set("Error: " + e.getMessage());
                                                         } finally {
                                                             o.setAvailable(true);

@@ -90,6 +90,9 @@ public class TTSVoicechatPlugin implements VoicechatPlugin {
                 playLocally(adjusted);
             }
             queueAudio(adjusted);
+        }).exceptionally(e -> {
+            Simpletts.LOGGER.error("speak failed", e);
+            return null;
         });
     }
 
