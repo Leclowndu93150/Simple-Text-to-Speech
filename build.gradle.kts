@@ -25,18 +25,30 @@ prism {
     maven("henkelmax", "https://maven.maxhenkel.de/repository/public")
     maven("xander", "https://maven.isxander.dev/releases")
 
+    publishing {
+        changelog = "Initial release."
+        type = STABLE
+
+        curseforge {
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            projectId = "1513991"
+        }
+
+        dependencies {
+            requires("simple-voice-chat")
+            requires("yacl")
+        }
+    }
+
     sharedCommon {
         dependencies {
-            shadow("org.pitest.voices:chorus:0.0.9")
-            shadow("org.pitest.voices:core:0.0.9")
-            shadow("org.pitest.voices:g2p:0.0.9")
-            shadow("org.pitest.voices:piper-runtime:0.0.9")
-            shadow("org.pitest.voices:model-downloader:0.0.9")
-            shadow("org.pitest.voices:en_us:0.0.9")
-            shadow("com.microsoft.onnxruntime:onnxruntime:1.20.0") {
-                excludeRelocation("ai/onnxruntime/**")
-                strip("META-INF/services/**")
-            }
+            compileOnly("org.pitest.voices:chorus:0.0.9")
+            compileOnly("org.pitest.voices:core:0.0.9")
+            compileOnly("org.pitest.voices:g2p:0.0.9")
+            compileOnly("org.pitest.voices:piper-runtime:0.0.9")
+            compileOnly("org.pitest.voices:model-downloader:0.0.9")
+            compileOnly("org.pitest.voices:en_us:0.0.9")
+            compileOnly("com.microsoft.onnxruntime:onnxruntime:1.20.0")
         }
     }
 
@@ -53,6 +65,13 @@ prism {
                 modImplementation("curse.maven:simple-voice-chat-416089:7905011")
                 modImplementation("dev.isxander:yet-another-config-lib:3.6.6+1.20.1-fabric")
                 modImplementation("curse.maven:modmenu-308702:5162837")
+                jarJar("org.pitest.voices:chorus:0.0.9")
+                jarJar("org.pitest.voices:core:0.0.9")
+                jarJar("org.pitest.voices:g2p:0.0.9")
+                jarJar("org.pitest.voices:piper-runtime:0.0.9")
+                jarJar("org.pitest.voices:model-downloader:0.0.9")
+                jarJar("org.pitest.voices:en_us:0.0.9")
+                jarJar("com.microsoft.onnxruntime:onnxruntime:1.20.0")
             }
         }
         forge {
@@ -61,6 +80,16 @@ prism {
             dependencies {
                 modImplementation("curse.maven:simple-voice-chat-416089:7905002")
                 modImplementation("dev.isxander:yet-another-config-lib:3.6.6+1.20.1-forge")
+                shadow("org.pitest.voices:chorus:0.0.9")
+                shadow("org.pitest.voices:core:0.0.9")
+                shadow("org.pitest.voices:g2p:0.0.9")
+                shadow("org.pitest.voices:piper-runtime:0.0.9")
+                shadow("org.pitest.voices:model-downloader:0.0.9")
+                shadow("org.pitest.voices:en_us:0.0.9")
+                shadow("com.microsoft.onnxruntime:onnxruntime:1.20.0") {
+                    excludeRelocation("ai/onnxruntime/**")
+                    strip("META-INF/services/**")
+                }
             }
         }
     }
